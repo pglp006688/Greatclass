@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+dist/
+*.spec
+ffmpeg.7z
+ffmpeg_tmp/
+bin/ffmpeg.exe
+bin/ffmpeg
+.idea/
+.vscode/
+*.gclass.json
+*.ffmpeg.log
+*.lesson*.log
