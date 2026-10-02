@@ -1,0 +1,102 @@
+name: Build GreatClass
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows Executables
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Download ffmpeg (full build with libx264)
+        shell: pwsh
+        run: |
+          $url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z"
+          Write-Host "Downloading ffmpeg from $url"
+          Invoke-WebRequest -Uri $url -OutFile ffmpeg.7z
+          7z x ffmpeg.7z -offmpeg_tmp
+          $ffmpegDir = Get-ChildItem ffmpeg_tmp -Directory | Select-Object -First 1
+          $ffmpegExe = Join-Path $ffmpegDir.FullName "bin\ffmpeg.exe"
+          if (-not (Test-Path $ffmpegExe)) {
+            throw "ffmpeg.exe not found at $ffmpegExe"
+          }
+          New-Item -ItemType Directory -Force -Path bin | Out-Null
+          Copy-Item $ffmpegExe bin\ffmpeg.exe
+          Write-Host "ffmpeg copied to bin\ffmpeg.exe"
+
+      - name: Verify ffmpeg has libx264
+        shell: pwsh
+        run: |
+          $out = & bin\ffmpeg.exe -hide_banner -encoders 2>&1 | Out-String
+          if ($out -notmatch "libx264") {
+            Write-Error "ffmpeg does not include libx264 encoder"
+            exit 1
+          }
+          Write-Host "OK: libx264 found"
+
+      - name: Build Teacher
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onedir ^
+            --name GreatClassTeacher ^
+            --add-binary "bin/ffmpeg.exe;bin" ^
+            --collect-all PySide6 ^
+            teacher/main.py
+
+      - name: Build Student
+        run: |
+          pyinstaller --noconfirm --clean --windowed --onedir ^
+            --name GreatClassStudent ^
+            --collect-all PySide6 ^
+            student/main.py
+
+      - name: Zip artifacts
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\GreatClassTeacher\* `
+            -DestinationPath dist\GreatClassTeacher-Windows.zip -Force
+          Compress-Archive -Path dist\GreatClassStudent\* `
+            -DestinationPath dist\GreatClassStudent-Windows.zip -Force
+
+      - name: Upload Teacher artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GreatClassTeacher-Windows
+          path: dist/GreatClassTeacher-Windows.zip
+          retention-days: 30
+
+      - name: Upload Student artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GreatClassStudent-Windows
+          path: dist/GreatClassStudent-Windows.zip
+          retention-days: 30
+
+      - name: Release on tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/GreatClassTeacher-Windows.zip
+            dist/GreatClassStudent-Windows.zip
+          generate_release_notes: true
