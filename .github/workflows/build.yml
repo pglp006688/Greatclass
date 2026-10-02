@@ -56,27 +56,16 @@ jobs:
           Write-Host "OK: libx264 found"
 
       - name: Build Teacher
-        run: |
-          pyinstaller --noconfirm --clean --windowed --onedir ^
-            --name GreatClassTeacher ^
-            --add-binary "bin/ffmpeg.exe;bin" ^
-            --collect-all PySide6 ^
-            teacher/main.py
+        run: pyinstaller --noconfirm --clean --windowed --onedir --name GreatClassTeacher --add-binary "bin/ffmpeg.exe;bin" --collect-all PySide6 teacher/main.py
 
       - name: Build Student
-        run: |
-          pyinstaller --noconfirm --clean --windowed --onedir ^
-            --name GreatClassStudent ^
-            --collect-all PySide6 ^
-            student/main.py
+        run: pyinstaller --noconfirm --clean --windowed --onedir --name GreatClassStudent --collect-all PySide6 student/main.py
 
       - name: Zip artifacts
         shell: pwsh
         run: |
-          Compress-Archive -Path dist\GreatClassTeacher\* `
-            -DestinationPath dist\GreatClassTeacher-Windows.zip -Force
-          Compress-Archive -Path dist\GreatClassStudent\* `
-            -DestinationPath dist\GreatClassStudent-Windows.zip -Force
+          Compress-Archive -Path dist\GreatClassTeacher\* -DestinationPath dist\GreatClassTeacher-Windows.zip -Force
+          Compress-Archive -Path dist\GreatClassStudent\* -DestinationPath dist\GreatClassStudent-Windows.zip -Force
 
       - name: Upload Teacher artifact
         uses: actions/upload-artifact@v4
