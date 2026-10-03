@@ -3,7 +3,9 @@
 [English](./README.md)
 
 >需要 `ffmpeg.exe` 在 `bin` 文件夹
-
+## 关于录制
+自行选择，我没有强迫，可以是OBS Studios或其他。但我用[https://github.com/Zhischooler/Greatclass-Recorder](https://github.com/Zhischooler/Greatclass-Recorder)
+##
 一个用于录制在线课程的软件 离线录制讲座工具。老师可以上传视频，系统会自动压缩到720p并打包成一个JSON课程文件；学生只需导入JSON就可以开始学习，支持切换章节、全屏播放，以及带有继续播放功能的控制栏。
 ### 全程不依赖服务器，一个 JSON 文件即一门课。
 - **教师端**：多集视频一次导入，自动 ffmpeg 压缩 720p，Base64 内嵌，一键生成 `.gclass.json`
