@@ -8,6 +8,7 @@
 
 You answer, e.g OBS Studios.l use the [https://github.com/Zhischooler/Greatclass-Recorder](https://github.com/Zhischooler/Greatclass-Recorder)
 
+##
 A software for recording online classes
 Offline recorded lecture tool. Teachers can upload videos, which are automatically compressed to 720p and packaged into a single JSON course file; students just import the JSON to start learning, with support for switching episodes, fullscreen playback, and a control bar with resume playback.
 ### No server required at all—one JSON file equals one course.
